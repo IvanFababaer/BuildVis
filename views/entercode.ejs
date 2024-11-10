@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Code | Student App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --yellow: #ffc107;
+            --dark-yellow: #e0a800;
+            --light-yellow-bg: #fffbea;
+            --form-bg: #fff3cd;
+            --text-dark: #1c1c1c;
+            --box-shadow: rgba(0, 0, 0, 0.1);
+            --font-primary: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-yellow-bg);
+            color: var(--text-dark);
+            font-family: var(--font-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .form-container {
+            background-color: var(--form-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px var(--box-shadow);
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.6s ease-in-out;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--dark-yellow);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .code-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .code-input {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--dark-yellow);
+            border-radius: 8px;
+            background-color: #fff;
+            transition: border-color 0.3s;
+        }
+
+        .code-input:focus {
+            border-color: var(--yellow);
+            outline: none;
+            box-shadow: 0 0 5px var(--yellow);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--yellow);
+            color: var(--text-dark);
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--dark-yellow);
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Enter Verification Code</h2>
+        <form action="/verifyCode" method="POST" onsubmit="handleSubmit(event)">
+            <input type="hidden" name="email" value="<%= email %>">
+            <div class="code-input-container">
+                <input type="text" maxlength="1" class="code-input" required oninput="moveToNextField(this)" />
+                <input type="text" maxlength="1" class="code-input" required oninput="moveToNextField(this)" />
+                <input type="text" maxlength="1" class="code-input" required oninput="moveToNextField(this)" />
+                <input type="text" maxlength="1" class="code-input" required oninput="moveToNextField(this)" />
+                <input type="text" maxlength="1" class="code-input" required oninput="moveToNextField(this)" />
+                <input type="text" maxlength="1" class="code-input" required oninput="moveToNextField(this)" />
+            </div>
+            <button type="submit">Verify Code</button>
+        </form>
+    </div>
+
+    <script>
+        // Moves focus to the next input when a digit is entered
+        function moveToNextField(element) {
+            const maxLength = element.maxLength;
+            if (element.value.length === maxLength) {
+                let next = element.nextElementSibling;
+                while (next && next.tagName !== "INPUT") {
+                    next = next.nextElementSibling;
+                }
+                if (next) next.focus();
+            }
+            if (element.value === "" && element.previousElementSibling) {
+                element.previousElementSibling.focus();
+            }
+        }
+
+        // Collects input values and submits as a 6-digit code
+        function handleSubmit(event) {
+            event.preventDefault();
+            const inputs = document.querySelectorAll(".code-input");
+            let code = "";
+            inputs.forEach(input => {
+                code += input.value;
+            });
+            if (code.length === 6) {
+                // Append the code as a hidden input
+                const form = event.target;
+                const hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "verificationCode";
+                hiddenInput.value = code;
+                form.appendChild(hiddenInput);
+                form.submit();
+            } else {
+                alert("Please enter a 6-digit code.");
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

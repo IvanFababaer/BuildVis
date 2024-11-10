@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="..//tool.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Billing Details</title>
+</head>
+<body class="pt-20">
+    <%- include('partials/nav') %>
+    <div class="p-10 bg-gray-100 max-w-2xl mx-auto rounded-lg shadow-lg mt-20 mb-20">
+        <h1 class="text-2xl font-bold font-sans">Billing Details</h1>
+        <br>
+        <div class="mb-4">
+            <label for="firstName" class="block text-gray-700 font-semibold mb-1">First Name:</label>
+            <input type="text" name="firstName" placeholder="Enter First Name" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="mb-4">
+            <label for="middleName" class="block text-gray-700 font-semibold mb-1">Middle Name:</label>
+            <input type="text" name="middleName" placeholder="Enter Middle Name" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="mb-4">
+            <label for="lastName" class="block text-gray-700 font-semibold mb-1">Last Name:</label>
+            <input type="text" name="lastName" placeholder="Enter Last Name" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="mb-4">
+            <label for="address" class="block text-gray-700 font-semibold mb-1">Address:</label>
+            <input type="text" name="address" placeholder="Enter Address" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="mb-4">
+            <label for="note" class="block text-gray-700 font-semibold mb-1">Note:</label>
+            <input type="text" name="note" placeholder="Additional Note" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <button 
+        type="submit" 
+        class="w-full bg-indigo-500 text-white font-semibold py-2 rounded-lg hover:bg-indigo-600 transition-colors">
+        Update Billing Details
+        </button>
+        <br>
+        <br>
+        <button 
+        type="button" 
+        class="w-full bg-indigo-500 text-white font-semibold py-2 rounded-lg hover:bg-indigo-600 transition-colors">
+        Remove Billing Details
+        </button>
+    </div>
+    
+    <script type="module" src="..//script/script.js"></script>
+</body>
+</html>

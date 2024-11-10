@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="..//tool.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Smooth transitions */
+    .dropdown-transition {
+      transition: transform 0.2s ease-in-out;
+    }
+    .opacity-transition {
+      transition: opacity 0.2s ease-in-out;
+    }
+  </style>
+  <title>Materials</title>
+</head>
+<body class="pt-28 overscroll-none">
+  <%- include('partials/nav') %>
+
+  
+ 
+  <div class="flex justify-between items-center py-8 px-40">
+    <h1 class="text-start font-sans text-5xl font-semibold tracking-tight text-gray-900">Materials</h1>
+    <div class="relative w-full max-w-xs" id="combobox-container">
+    <!-- Input Container -->
+    <div class="relative left-7">
+      <input
+        type="text"
+        id="combobox-input"
+        class="w-full px-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+        placeholder="Search a material..."
+        role="combobox"
+        aria-expanded="false"
+        aria-controls="dropdown-list"
+      />
+      <button
+        type="button"
+        id="toggle-button"
+        class="absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 hover:text-gray-600"
+        aria-label="Toggle dropdown"
+      >
+        <svg
+          class="w-4 h-4 dropdown-transition"
+          id="dropdown-arrow"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Dropdown List -->
+    <ul
+      id="dropdown-list"
+      class="hidden absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto opacity-transition"
+      role="listbox"
+    ></ul>
+  </div>
+    
+  </div>
+
+
+
+
+  <div class="bg-white">
+    <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+      <h2 class="text-2xl font-bold tracking-tight text-gray-900">Material List</h2>
+  
+      <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+
+        <% product.forEach(pr => { %>
+        <div class="group relative">
+          <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
+            <img src="<%= pr.image_url %>" alt="Front of men&#039;s Basic Tee in black." class="h-full w-full object-cover object-center lg:h-full lg:w-full">
+          </div>
+          <div class="mt-4 flex justify-between">
+            <div>
+              <h3 class="text-sm text-gray-700">
+                <a href="/material-overview/<%= pr.product_id %>">
+                  <span aria-hidden="true" class="absolute inset-0"></span>
+                  <%= pr.name %>
+                </a>
+              </h3>
+              <p class="mt-1 text-sm text-gray-500"><%= pr.description %></p>
+            </div>
+            <p class="text-sm font-medium text-gray-900">&#8369;<%= pr.price %></p>
+          </div>
+        </div>
+        <% }) %>
+  
+        <!-- More products... -->
+      </div>
+    </div>
+  </div>
+
+
+  <footer class="bg-gray-800 text-white py-8">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2024 BuildPro. All rights reserved.</p>
+    </div>
+  </footer>
+
+
+
+  <script>
+
+
+    // Sample data - replace with your own items
+    const items = [
+      'Cement',
+      'Hard Wood',
+      'Plywood',
+      'Hollow Blocks'
+    ];
+
+    // DOM elements
+    const input = document.getElementById('combobox-input');
+    const toggleButton = document.getElementById('toggle-button');
+    const dropdownList = document.getElementById('dropdown-list');
+    const dropdownArrow = document.getElementById('dropdown-arrow');
+    const container = document.getElementById('combobox-container');
+
+    // State
+    let isOpen = false;
+    let highlightedIndex = -1;
+    let filteredItems = [];
+
+    // Toggle dropdown visibility
+    function toggleDropdown(show = !isOpen) {
+      isOpen = show;
+      dropdownList.classList.toggle('hidden', !isOpen);
+      dropdownArrow.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0)';
+      input.setAttribute('aria-expanded', isOpen);
+      
+      if (isOpen) {
+        filterItems(input.value);
+      }
+    }
+
+    // Filter and display items
+    function filterItems(searchText) {
+      filteredItems = items.filter(item =>
+        item.toLowerCase().includes(searchText.toLowerCase())
+      );
+
+      dropdownList.innerHTML = '';
+      
+      if (filteredItems.length === 0) {
+        const noResults = document.createElement('li');
+        noResults.className = 'px-4 py-2 text-sm text-gray-500';
+        noResults.textContent = 'No results found';
+        dropdownList.appendChild(noResults);
+        return;
+      }
+
+      filteredItems.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = `
+          px-4 
+          py-2 
+          text-sm 
+          cursor-pointer 
+          text-gray-900 
+          hover:bg-gray-100 
+          transition-colors 
+          duration-150
+          ${highlightedIndex === index ? 'bg-blue-100 text-blue-900' : ''}
+        `;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', highlightedIndex === index);
+        
+        // Highlight matching text
+        const searchText = input.value.toLowerCase();
+        const itemText = item;
+        const matchIndex = itemText.toLowerCase().indexOf(searchText);
+        
+        if (searchText && matchIndex !== -1) {
+          const before = itemText.slice(0, matchIndex);
+          const match = itemText.slice(matchIndex, matchIndex + searchText.length);
+          const after = itemText.slice(matchIndex + searchText.length);
+          li.innerHTML = `${before}<span class="font-medium">${match}</span>${after}`;
+        } else {
+          li.textContent = itemText;
+        }
+        
+        li.addEventListener('mouseenter', () => {
+          highlightedIndex = index;
+          updateHighlight();
+        });
+        
+        li.addEventListener('click', () => {
+          selectItem(item);
+        });
+        
+        dropdownList.appendChild(li);
+      });
+    }
+
+    // Update highlighted item
+    function updateHighlight() {
+      const items = dropdownList.querySelectorAll('li');
+      items.forEach((item, index) => {
+        const isHighlighted = index === highlightedIndex;
+        item.className = `
+          px-4 
+          py-2 
+          text-sm 
+          cursor-pointer 
+          transition-colors 
+          duration-150
+          ${isHighlighted ? 'bg-blue-100 text-blue-900' : 'text-gray-900 hover:bg-gray-100'}
+        `;
+        item.setAttribute('aria-selected', isHighlighted);
+      });
+
+      // Scroll highlighted item into view if needed
+      if (highlightedIndex >= 0) {
+        const highlightedItem = items[highlightedIndex];
+        if (highlightedItem) {
+          const dropdownRect = dropdownList.getBoundingClientRect();
+          const itemRect = highlightedItem.getBoundingClientRect();
+          
+          if (itemRect.bottom > dropdownRect.bottom) {
+            highlightedItem.scrollIntoView(false);
+          } else if (itemRect.top < dropdownRect.top) {
+            highlightedItem.scrollIntoView(true);
+          }
+        }
+      }
+    }
+
+    // Select an item
+    function selectItem(item) {
+      input.value = item;
+      toggleDropdown(false);
+      input.focus();
+    }
+
+    // Event Listeners
+    toggleButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdown();
+    });
+
+    input.addEventListener('focus', () => {
+      if (!isOpen) {
+        toggleDropdown(true);
+      }
+    });
+
+    input.addEventListener('input', (e) => {
+      if (!isOpen) {
+        toggleDropdown(true);
+      }
+      filterItems(e.target.value);
+      highlightedIndex = 0;
+      updateHighlight();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (!isOpen && e.key === 'ArrowDown') {
+        toggleDropdown(true);
+        return;
+      }
+
+      if (isOpen) {
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            highlightedIndex = Math.min(highlightedIndex + 1, filteredItems.length - 1);
+            updateHighlight();
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            highlightedIndex = Math.max(highlightedIndex - 1, 0);
+            updateHighlight();
+            break;
+          case 'Enter':
+            e.preventDefault();
+            if (highlightedIndex >= 0) {
+              selectItem(filteredItems[highlightedIndex]);
+            }
+            break;
+          case 'Escape':
+            toggleDropdown(false);
+            break;
+          case 'Tab':
+            toggleDropdown(false);
+            break;
+        }
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target) && isOpen) {
+        toggleDropdown(false);
+      }
+    });
+
+    // Initial setup
+    filterItems('');
+  </script>
+  <script type="module" src="..//script/script.js"></script>
+</body>
+</html>
