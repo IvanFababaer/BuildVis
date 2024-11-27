@@ -100,12 +100,21 @@
 
   <script>
     // Initialize Stripe
+<<<<<<< HEAD
     document.addEventListener('DOMContentLoaded', () => {
   // Initialize Stripe
   const stripe = Stripe('pk_test_51QByzxDiiet8LsHjt9LyFFPeuIIY9rJi8QUlyBy4PvIejxqytpo6FhmZlnjOPBW2f1AiplJ4tZmbequbM2edLKdG00ktGZ99qv');
   const elements = stripe.elements();
   const cardElement = elements.create('card');
   cardElement.mount('#card-element');
+=======
+    const stripe = Stripe('pk_test'); // Replace with your Stripe public key
+    const elements = stripe.elements();
+    const cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+    // Frontend
+const totalEl = parseFloat(document.getElementById('total').value); // Ensure total is a float
+>>>>>>> 4b4189a2d61b3bdb213ec7b6a78900ceccbee3d3
 
   // Select elements
   const form = document.getElementById('payment-form');
