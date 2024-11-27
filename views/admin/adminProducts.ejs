@@ -40,9 +40,12 @@
         </button>
     </div>
     <nav class="mt-4">
-        <a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">Dashboard</a>
+        <a href="/admin" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">Dashboard</a>
         <a href="/adminUser" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">Users</a>
         <a href="/adminProduct" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">Products</a>
+        <a href="/adminOrder" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">Orders</a>
+        <a href="/analytics" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">Analytics</a>
+        <a href="/logout" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">Logout</a>
     </nav>
 </aside>
 
@@ -67,7 +70,9 @@
                             <th>Product ID</th>
                             <th>Product Name</th>
                             <th>Price</th>
-                            <th>Stock</th>
+                            <th>Current Stock</th>
+                            <th>Maximum Stock</th>
+                            <th>Availability</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -77,7 +82,9 @@
                             <td><%= pr.product_id %></td>
                             <td><%= pr.name %></td>
                             <td><%= pr.price %></td>
-                            <td><%= pr.stock %></td>
+                            <td><%= pr.current_stock %></td>
+                            <td><%= pr.max_stock %></td>
+                            <td><%= pr.availability %></td>
                             <td>
                                 <button class="editBtn px-2 py-1 bg-blue-500 text-white rounded">Edit</button>
                             </td>
@@ -104,8 +111,12 @@
                         <input type="text" name="description" id="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter product name" required>
                     </div>
                     <div class="mb-4">
-                        <label for="productStock" class="block text-sm font-medium text-gray-700">Stock</label>
-                        <input type="text" name="stock" id="productStock" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter stock quantity" required>
+                        <label for="current_stock" class="block text-sm font-medium text-gray-700">Current Stock</label>
+                        <input type="text" name="current_stock" id="current_stock" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter current stock quantity" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="max_stock" class="block text-sm font-medium text-gray-700">Maximum Stock</label>
+                        <input type="text" name="max_stock" id="max_stock" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter maximum stock quantity" required>
                     </div>
                     <div class="mb-4">
                         <label for="imgPrd" class="block text-sm font-medium text-gray-700">Product upload image</label>
@@ -125,26 +136,48 @@
 
 <!-- Edit Modal -->
 <div id="editModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
-    <form action="/editProduct" method="post">
+    <form id="editForm" action="/editProduct" method="post">
         <div class="bg-white rounded-lg shadow-lg w-96 p-6">
             <h2 id="productName" class="text-xl font-semibold mb-4">Edit Product - <span id="modalProductName"></span></h2>
             <input type="hidden" id="productId" name="productId">
             <div class="mb-4">
                 <label for="editPrice" class="block text-sm font-medium text-gray-700">Price</label>
-                <input type="text" name="price" id="editPrice" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter new price">
+                <input type="number" name="price" id="editPrice" min="0" step="0.01" 
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <p id="priceError" class="text-sm text-red-500 hidden">Please enter a valid price.</p>
             </div>
             <div class="mb-4">
-                <label for="editStock" class="block text-sm font-medium text-gray-700">Stock</label>
-                <input type="text" name="stock" id="editStock" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter new stock">
+                <label for="editCurrentStock" class="block text-sm font-medium text-gray-700">Current Stock</label>
+                <input type="number" name="currentStock" id="editCurrentStock" min="0" 
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <p id="currentStockError" class="text-sm text-red-500 hidden">Current stock cannot exceed maximum stock.</p>
+            </div>
+            <div class="mb-4">
+                <label for="editMaxStock" class="block text-sm font-medium text-gray-700">Maximum Stock</label>
+                <input type="number" name="maxStock" id="editMaxStock" min="0" 
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" readonly>
+                <div class="mt-2">
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="editMaxStockToggle">
+                        <span>Allow editing Maximum Stock</span>
+                    </label>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="editAvailability" class="block text-sm font-medium text-gray-700">Availability</label>
+                <select name="availability" id="editAvailability" 
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="available">Available</option>
+                    <option value="not_available">Not Available</option>
+                </select>
             </div>
             <div class="flex justify-end">
-                <button id="saveButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg mr-2" type="submit">Save</button>
-                <button id="closeModal" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
+                <button id="saveButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg mr-2" type="submit" readonly>Save</button>
+                <button id="closeModal" class="px-4 py-2 bg-gray-300 rounded-lg" type="button">Cancel</button>
             </div>
         </div>
     </form>
 </div>
-
 
 
 
@@ -153,48 +186,70 @@
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
 <script>
-    $(document).ready(function() {
-        var table = $('#example').DataTable({
-            responsive: true
-        }).columns.adjust().responsive.recalc();
+    $(document).ready(function () {
+        // Initialize DataTable immediately on page load
+        const table = $('#example').DataTable({
+            responsive: true,
+            autoWidth: false // Prevent layout recalculation issues
+        });
 
-        // Open modal on Edit button click
+        // Event listener for Edit button
         $('#example tbody').on('click', 'button.editBtn', function () {
-            var data = table.row($(this).parents('tr')).data();
+            const data = table.row($(this).parents('tr')).data();
 
-            // Populate modal fields with selected row data
-            $('#productId').val(data[0]); // Product ID
-            $('#modalProductName').text(data[1]); // Product Name
-            $('#editPrice').val(data[2]); // Price
-            $('#editStock').val(data[3]); // Stock
+            // Prefill modal with selected row data
+            $('#productId').val(data[0]);
+            $('#modalProductName').text(data[1]);
+            $('#editPrice').val(data[2]);
+            $('#editCurrentStock').val(data[3]);
+            $('#editMaxStock').val(data[4]);
+            $('#editAvailability').val(data[5]);
 
-            // Show modal
+            // Open modal
             $('#editModal').removeClass('hidden');
         });
 
-        // Close modal on Cancel button click
+        // Modal Close
         $('#closeModal').on('click', function () {
             $('#editModal').addClass('hidden');
         });
 
-        // Close modal when clicking outside
-        $(document).on('click', function (e) {
-            if ($(e.target).is('#editModal')) {
-                $('#editModal').addClass('hidden');
+        // Enable editing for Maximum Stock
+        $('#editMaxStockToggle').on('change', function () {
+            $('#editMaxStock').prop('readonly', !this.checked);
+        });
+
+        // Input validation
+        function validateInputs() {
+            let isValid = true;
+
+            // Price validation
+            const price = parseFloat($('#editPrice').val());
+            if (isNaN(price) || price < 0) {
+                $('#priceError').removeClass('hidden');
+                isValid = false;
+            } else {
+                $('#priceError').addClass('hidden');
             }
-        });
 
-        // Save button logic (placeholder for actual save functionality)
-        $('#saveButton').on('click', function () {
-            var productId = $('#productId').val();
-            var newPrice = $('#editPrice').val();
-            var newStock = $('#editStock').val();
+            // Stock validation
+            const currentStock = parseInt($('#editCurrentStock').val(), 10);
+            const maxStock = parseInt($('#editMaxStock').val(), 10) || Infinity;
+            if (currentStock > maxStock || isNaN(currentStock)) {
+                $('#currentStockError').removeClass('hidden');
+                isValid = false;
+            } else {
+                $('#currentStockError').addClass('hidden');
+            }
 
-            console.log(`Saving Product ID: ${productId}, New Price: ${newPrice}, New Stock: ${newStock}`);
+            // Toggle save button
+            $('#saveButton').prop('disabled', !isValid);
+        }
 
-            $('#editModal').addClass('hidden');
-        });
+        // Add listeners for validation
+        $('#editPrice, #editCurrentStock, #editMaxStock').on('input', validateInputs);
     });
+
 </script>
 
 </body>

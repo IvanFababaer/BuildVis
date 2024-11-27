@@ -12,7 +12,18 @@
   <div class="container mx-auto p-8">
     <h1 class="text-4xl font-bold text-gray-800 mb-10 text-center">Shopping Cart</h1>
     <div class="lg:flex lg:space-x-8">
-  
+
+      <!-- Check if cartItem is empty -->
+      <% if (cartItem.length === 0) { %>
+        <div class="text-center bg-white border border-gray-200 rounded-lg p-8 shadow-md w-full">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-4">Your cart is empty!</h2>
+          <p class="text-gray-600 mb-6">It looks like you haven't added anything to your cart yet.</p>
+          <a href="/shop" class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition">
+            Continue Shopping
+          </a>
+        </div>
+      <% } else { %>
+
       <!-- Cart Items -->
       <div id="cart-items" class="lg:w-2/3 space-y-6 bg-white border border-gray-200 rounded-lg p-6 shadow-md">
         <!-- Select All Checkbox -->
@@ -20,7 +31,7 @@
           <input type="checkbox" id="select-all" class="w-5 h-5">
           <label for="select-all" class="ml-2 text-lg text-gray-700">Select All</label>
         </div>
-    
+
         <% cartItem.forEach(item => { %>
           <div class="cart-item flex items-center bg-white border border-gray-200 rounded-lg p-6 shadow-md" 
                data-price="<%= item.price %>" 
@@ -42,8 +53,10 @@
           </div>
         <% }) %>
       </div>
-    
+      <% } %>
+
       <!-- Order Summary -->
+      <% if (cartItem.length > 0) { %>
       <div class="bg-white p-6 rounded-lg shadow-md mt-8 lg:mt-0 lg:w-1/3 space-y-6">
         <h2 class="text-2xl font-semibold mb-4 text-gray-800 text-center">Order Summary</h2>
         <div class="flex justify-between border-b border-gray-200 pb-3 text-gray-700">
@@ -64,7 +77,7 @@
         </div>
         <button class="checkout w-full bg-indigo-600 text-white rounded-lg py-3 mt-6 font-semibold hover:bg-indigo-700 transition">Checkout</button>
       </div>
-      
+      <% } %>
     </div>
   </div>
 
@@ -176,55 +189,51 @@
 
     // Function to collect selected items
     function getCheckedItems() {
-    const selectedItems = [];
-    document.querySelectorAll('.cart-item').forEach(item => {
+      const selectedItems = [];
+      document.querySelectorAll('.cart-item').forEach(item => {
         const checkbox = item.querySelector('.select-item');
         if (checkbox.checked) {
-            selectedItems.push({
-                cartId: item.getAttribute('data-cart-id'),
-                productId: item.getAttribute('data-product-id'),
-                name: item.getAttribute('data-name'),
-                price: parseFloat(item.getAttribute('data-price')),
-                quantity: parseInt(item.querySelector('.quantity').value),
-            });
+          selectedItems.push({
+            cartId: item.getAttribute('data-cart-id'),
+            productId: item.getAttribute('data-product-id'),
+            name: item.getAttribute('data-name'),
+            price: parseFloat(item.getAttribute('data-price')),
+            quantity: parseInt(item.querySelector('.quantity').value),
+          });
         }
-    });
-    return selectedItems; // Returns an array of selected items
-  }
-
+      });
+      return selectedItems; // Returns an array of selected items
+    }
 
     // Handle checkout
     document.querySelector('button.checkout').addEventListener('click', async () => {
-    const checkedItems = getCheckedItems(); // Collect checked items
-    const subtotalEl = document.getElementById('subtotal').innerHTML;
-    const taxEl = document.getElementById('tax').innerHTML;
-    const totalEl = document.getElementById('total').innerHTML;
-    if (checkedItems.length === 0) {
+      const checkedItems = getCheckedItems(); // Collect checked items
+      const subtotalEl = document.getElementById('subtotal').innerHTML;
+      const taxEl = document.getElementById('tax').innerHTML;
+      const totalEl = document.getElementById('total').innerHTML;
+      if (checkedItems.length === 0) {
         alert('No items selected for checkout.');
         return;
-    }
+      }
 
-    try {
+      try {
         const response = await fetch('/checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: checkedItems, subtotalEl : subtotalEl, taxEl : taxEl, totalEl : totalEl }), // Send items
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: checkedItems, subtotalEl, taxEl, totalEl }), // Send items
         });
 
         if (response.ok) {
-            window.location.href = '/checkout'; // Redirect to the GET route
+          window.location.href = '/checkout'; // Redirect to the GET route
         } else {
-            const error = await response.json();
-            alert(error.message || 'Failed to process your checkout.');
+          const error = await response.json();
+          alert(error.message || 'Failed to process your checkout.');
         }
-    } catch (err) {
+      } catch (err) {
         console.error('Error during checkout:', err);
         alert('An error occurred. Please try again.');
-    }
-});
-
-
-
+      }
+    });
   </script>
   <script type="module" src="../script/script.js"></script>
 </body>

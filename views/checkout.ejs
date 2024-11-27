@@ -17,6 +17,7 @@
     <!-- Billing Details -->
     <% billing.forEach(billing => { %>
     <section class="bg-white shadow rounded-lg p-6 mb-8">
+      <input type="hidden" name="billing_id" id="billing_id" value="<%= billing.billing_id %>">
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">Billing Information</h2>
       <p class="mb-3"><span class="font-medium">Name:</span> <%= billing.fullname %></p>
       <p class="mb-3"><span class="font-medium">Address:</span> <%= billing.address %></p>
@@ -31,6 +32,7 @@
         <% items.forEach(item => { %>
         <li class="py-5 flex justify-between items-center">
           <div>
+            <input type="hidden" name="cart_id" id="cart_id" value="<%= item.cartId %>">
             <h3 class="text-lg font-semibold text-gray-900"><%= item.name %></h3>
             <p class="text-sm text-gray-500">Quantity: <%= item.quantity %></p>
             <p class="text-sm text-gray-500">Price: &#8369;<%= item.price %></p>
@@ -46,6 +48,7 @@
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">Order Summary</h2>
       <div class="flex justify-between items-center mb-4">
         <span class="text-gray-600">Subtotal:</span>
+        <input type="hidden" name="userId" id="userId" value="<%= userId %>">
         <input
           type="text"
           name="subtotal"
@@ -97,47 +100,71 @@
 
   <script>
     // Initialize Stripe
-    const stripe = Stripe('pk_test_51QByzxDiiet8LsHjt9LyFFPeuIIY9rJi8QUlyBy4PvIejxqytpo6FhmZlnjOPBW2f1AiplJ4tZmbequbM2edLKdG00ktGZ99qv'); // Replace with your Stripe public key
-    const elements = stripe.elements();
-    const cardElement = elements.create('card');
-    cardElement.mount('#card-element');
-    // Frontend
-const totalEl = parseFloat(document.getElementById('total').value); // Ensure total is a float
+    document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Stripe
+  const stripe = Stripe('pk_test_51QByzxDiiet8LsHjt9LyFFPeuIIY9rJi8QUlyBy4PvIejxqytpo6FhmZlnjOPBW2f1AiplJ4tZmbequbM2edLKdG00ktGZ99qv');
+  const elements = stripe.elements();
+  const cardElement = elements.create('card');
+  cardElement.mount('#card-element');
 
-// Handle form submission
-const form = document.getElementById('payment-form');
-form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  
-  try {
-    // Fetch the client secret from the backend
-    const response = await fetch('/create-payment-intent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: Math.round(totalEl * 100) }), // Convert PHP to cents
-    });
-    
-    const { clientSecret } = await response.json();
-    if (!clientSecret) throw new Error('Failed to create Payment Intent');
+  // Select elements
+  const form = document.getElementById('payment-form');
+  const totalEl = parseFloat(document.getElementById('total').value);
+  const userId = document.getElementById('userId').value;
+  const billing_id = document.getElementById('billing_id').value;
 
-    // Confirm the payment
-    const { error } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: cardElement,
-      },
-    });
+  // Collect all cart IDs
+  const cartIds = Array.from(document.querySelectorAll('input[name="cart_id"]')).map(input => input.value);
 
-    if (error) {
-      document.getElementById('card-errors').textContent = error.message;
-    } else {
-      alert('Payment Successful!');
-      form.reset();
+  // Handle form submission
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    try {
+      // Create PaymentIntent
+      const response = await fetch('/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: Math.round(totalEl * 100) }), // Amount in cents
+      });
+
+      const { clientSecret } = await response.json();
+      const { error } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+        },
+      });
+
+      if (error) {
+        document.getElementById('card-errors').textContent = error.message;
+      } else {
+        alert('Payment Successful!');
+        
+        // Process the order
+        const processResponse = await fetch('/processOrder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cartIds, userId, billing_id}),
+        });
+
+        if (!processResponse.ok) {
+          const errorMessage = await processResponse.text();
+          console.error('Error processing order:', errorMessage);
+          alert('Failed to process the order. Details: ' + errorMessage);
+          return;
+        }
+
+        alert('Order placed successfully!');
+        window.location.href = '/materials'; // Redirect to confirmation page
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('card-errors').textContent = 'An error occurred. Please try again.';
     }
-  } catch (err) {
-    console.error(err);
-    document.getElementById('card-errors').textContent = 'An error occurred. Please try again.';
-  }
+  });
 });
+
+
 
   </script>
 </body>

@@ -14,7 +14,7 @@
         <div class="absolute left-0 mt-2 w-48 transform -translate-y-2 opacity-0 transition-all duration-200 dropdown-menu">
           <div class="bg-white rounded-lg shadow-lg p-1 border border-gray-200">
             <a href="/materials" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">Materials</a>
-            <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">House Model</a>
+            <a href="/house-model" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">House Model</a>
             <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">Apartment Model</a>
           </div>
         </div>
@@ -24,10 +24,12 @@
       <!-- Cart Icon with Notification Count -->
       <a href="/cart" class="relative text-gray-700 hover:text-green-800">
         <img src="..//grocery-store.png" alt="Cart" class="w-6 h-6 inline-block">
-        <!-- Notification Badge -->
-        <span class="absolute top-0 right-[-20px] flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -translate-x-1/2 -translate-y-1/2">
-          <%= totalRecords %> <!-- Example number, replace with dynamic count -->
-        </span>
+        <!-- Conditional Notification Badge -->
+        <% if (totalRecords > 0) { %>
+          <span class="absolute top-0 right-[-20px] flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -translate-x-1/2 -translate-y-1/2">
+            <%= totalRecords %>
+          </span>
+        <% } %>
       </a>
 
       <!-- Profile dropdown -->
@@ -42,8 +44,7 @@
         <!-- Dropdown menu -->
         <div id="dropdownMenu" class="absolute hidden mt-2 bg-white border border-gray-200 rounded-md shadow-lg">
           <a href="/profile" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
-          <a href="/billing-detail" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Billing Details</a>
-          <a href="#" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Orders</a>
+          <a href="/orders" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Orders</a>
           <a href="/logout" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
         </div>
       </div>

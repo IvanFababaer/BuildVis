@@ -60,28 +60,31 @@
         </div>
     </header>
 
-    <!-- Dashboard Content -->
     <main class="p-8">
         <div class="container w-full mx-auto px-2">
-            <div id='recipients' class="p-8 mt-6 rounded shadow bg-white">
+            <!-- Existing Table -->
+            <div id="recipients" class="p-8 mt-6 rounded shadow bg-white">
                 <table id="example" class="stripe hover" style="width:100%; padding-top: 1em; padding-bottom: 1em;">
                     <thead>
                         <tr>
-                            <th>User ID</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Actions</th>
-
+                            <th>Order ID</th>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                            <th>Order Date</th>
+                            <th>Order Status</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <% user.forEach(user=> {%>
+                        <% orders.forEach(order => { %>
                         <tr>
-                            <td><%= user.id %></td>
-                            <td><%= user.username %></td>
-                            <td><%= user.email %></td>
-                            <td><%= user.role %></td>
+                            <td><%= order.order_id %></td>
+                            <td><%= order.name %></td>
+                            <td><%= order.quantity %></td>
+                            <td><%= order.totalPrice %></td>
+                            <td><%= order.orderDate %></td>
+                            <td><%= order.status %></td>
                             <td>
                                 <button class="editBtn px-2 py-1 bg-blue-500 text-white rounded">Edit</button>
                             </td>
@@ -92,74 +95,100 @@
             </div>
         </div>
     </main>
+    
 </div>
 
 <!-- Edit Modal -->
 <div id="editModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
-    <form action="/editUsers" method="post">
+    <form id="editForm" action="/editOrderStatus" method="post">
         <div class="bg-white rounded-lg shadow-lg w-96 p-6">
-            <h2 id="userName" class="text-xl font-semibold mb-4">Edit Users - <span id="modalUserName"></span></h2>
-            <input type="hidden" id="user_id" name="user_id">
+            <h2 id="productName" class="text-xl font-semibold mb-4">Edit Product - <span id="modalProductName"></span></h2>
+            <input type="hidden" id="order_id" name="order_id">
             <div class="mb-4">
-                <label for="userRole" class="block text-sm font-medium text-gray-700">User  Role</label>
-                <select id="userRole" name="userRole" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <option value="" disabled selected>Select User Role</option>
-                    <option value="admin">admin</option>
-                    <option value="user">user</option>
+                <label for="editStatus" class="block text-sm font-medium text-gray-700">Status</label>
+                <select name="status" id="editStatus" 
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="pending">Pending</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="received">Received</option>
                 </select>
             </div>
             <div class="flex justify-end">
-                <button id="saveButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg mr-2" type="submit">Save</button>
+                <button id="saveButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg mr-2" type="submit" readonly>Save</button>
                 <button id="closeModal" class="px-4 py-2 bg-gray-300 rounded-lg" type="button">Cancel</button>
             </div>
         </div>
     </form>
 </div>
 
+
+
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
 <script>
-    $(document).ready(function() {
-        var table = $('#example').DataTable({
-            responsive: true
-        }).columns.adjust().responsive.recalc();
+    $(document).ready(function () {
+        // Initialize DataTable immediately on page load
+        const table = $('#example').DataTable({
+            responsive: true,
+            autoWidth: false // Prevent layout recalculation issues
+        });
 
-        // Open modal on Edit button click
+        // Event listener for Edit button
         $('#example tbody').on('click', 'button.editBtn', function () {
-            var data = table.row($(this).parents('tr')).data();
+            const data = table.row($(this).parents('tr')).data();
 
-            // Populate modal fields with selected row data
-            $('#user_id').val(data[0]); // Product ID
-            $('#modalUserName').text(data[1]); // Product Name
-            $('#userRole').val(data[3]); // Price
+            // Prefill modal with selected row data
+            $('#order_id').val(data[0]);
+            $('#modalProductName').text(data[1]);
+            $('#editStatus').val(data[5]);
 
-            // Show modal
+            // Open modal
             $('#editModal').removeClass('hidden');
         });
 
-        // Close modal on Cancel button click
+        // Modal Close
         $('#closeModal').on('click', function () {
             $('#editModal').addClass('hidden');
         });
 
-        // Close modal when clicking outside
-        $(document).on('click', function (e) {
-            if ($(e.target).is('#editModal')) {
-                $('#editModal').addClass('hidden');
+        // Enable editing for Maximum Stock
+        $('#editMaxStockToggle').on('change', function () {
+            $('#editMaxStock').prop('readonly', !this.checked);
+        });
+
+        // Input validation
+        function validateInputs() {
+            let isValid = true;
+
+            // Price validation
+            const price = parseFloat($('#editPrice').val());
+            if (isNaN(price) || price < 0) {
+                $('#priceError').removeClass('hidden');
+                isValid = false;
+            } else {
+                $('#priceError').addClass('hidden');
             }
-        });
 
-        // Save button logic (placeholder for actual save functionality)
-        $('#saveButton').on('click', function () {
-            var user_id = $('#user_id').val();
-            var userRole = $('#userRole').val();
+            // Stock validation
+            const currentStock = parseInt($('#editCurrentStock').val(), 10);
+            const maxStock = parseInt($('#editMaxStock').val(), 10) || Infinity;
+            if (currentStock > maxStock || isNaN(currentStock)) {
+                $('#currentStockError').removeClass('hidden');
+                isValid = false;
+            } else {
+                $('#currentStockError').addClass('hidden');
+            }
 
+            // Toggle save button
+            $('#saveButton').prop('disabled', !isValid);
+        }
 
-            $('#editModal').addClass('hidden');
-        });
+        // Add listeners for validation
+        $('#editPrice, #editCurrentStock, #editMaxStock').on('input', validateInputs);
     });
+
 </script>
 
 </body>

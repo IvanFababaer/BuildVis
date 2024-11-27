@@ -45,6 +45,18 @@
         </select>
       </div>
 
+      <!-- Availability Dropdown -->
+      <div>
+        <select
+          class="px-4 py-2 text-black bg-slate-100 rounded-md focus:ring-2 focus:ring-blue-500"
+          id="availabilitySelect"
+        >
+          <option value="all" selected>All</option>
+          <option value="available">Available</option>
+          <option value="not_available">Not Available</option>
+        </select>
+      </div>
+
       <!-- Price Filtering -->
       <div class="flex items-center space-x-2">
         <input
@@ -75,7 +87,7 @@
 
       <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
         <% product.forEach(pr => { %>
-        <div class="group relative" id="prcontainer" data-category="<%= pr.category.toLowerCase() %>" data-price="<%= pr.price %>">
+        <div class="group relative" id="prcontainer" data-category="<%= pr.category.toLowerCase() %>" data-price="<%= pr.price %>" data-availability="<%= pr.availability %>" >
           <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
             <img src="<%= pr.image_url %>" alt="<%= pr.name %>" class="h-full w-full object-cover object-center lg:h-full lg:w-full">
           </div>
@@ -120,30 +132,35 @@
       name: product.querySelector('#name').innerText.trim().toLowerCase(),
       category: product.dataset.category.toLowerCase(),
       price: parseFloat(product.dataset.price),
+      availability: product.dataset.availability.toLowerCase(),
     }));
 
     const searchInput = document.getElementById('searchinput');
     const categorySelect = document.getElementById('categorySelect');
+    const availabilitySelect = document.getElementById('availabilitySelect');
     const minPriceInput = document.getElementById('minPrice');
     const maxPriceInput = document.getElementById('maxPrice');
     const applyPriceFilterButton = document.getElementById('applyPriceFilter');
     const noResultMessage = document.getElementById('nores');
 
-    // Filter products based on search, category, and price
+    // Filter products based on search, category, price, and availability
     function filterProducts() {
       const searchQuery = searchInput.value.trim().toLowerCase();
       const selectedCategory = categorySelect.value;
+      const selectedAvailability = availabilitySelect.value;
       const minPrice = parseFloat(minPriceInput.value) || 0;
       const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
 
       let productFound = false;
 
-      products.forEach(({ element, name, category, price }) => {
+      products.forEach(({ element, name, category, price, availability }) => {
         const matchesCategory = selectedCategory === "all" || category === selectedCategory;
         const matchesSearch = name.includes(searchQuery);
         const matchesPrice = price >= minPrice && price <= maxPrice;
+        const matchesAvailability =
+          selectedAvailability === "all" || availability === selectedAvailability;
 
-        if (matchesCategory && matchesPrice && (searchQuery === "" || matchesSearch)) {
+        if (matchesCategory && matchesPrice && matchesAvailability && (searchQuery === "" || matchesSearch)) {
           element.style.display = 'block';
           productFound = true;
         } else {
@@ -157,6 +174,7 @@
     // Event listeners
     searchInput.addEventListener('input', debounce(filterProducts, 300));
     categorySelect.addEventListener('change', filterProducts);
+    availabilitySelect.addEventListener('change', filterProducts);
     applyPriceFilterButton.addEventListener('click', filterProducts);
   </script>
   <script>

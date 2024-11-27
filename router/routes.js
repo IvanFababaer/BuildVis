@@ -14,14 +14,19 @@ router.get('/admin', Mcontroller.show.showAdminDash);
 router.get('/email-verification', Mcontroller.show.showEmailVerification);
 router.get('/reset-password', Mcontroller.show.showResetPassword);
 router.get('/cart', Mcontroller.show.showCart);
-router.get('/billing-detail', Mcontroller.show.showBillingDetail);
 router.get('/profile', Mcontroller.show.showProfile);
 router.get('/checkout', Mcontroller.show.showCheckout);
+router.get('/order-confirmation', Mcontroller.show.orderConfirmation);
+router.get('/house-model', Mcontroller.show.showHouseModel);
+router.get('/orders', Mcontroller.show.showOrders);
 
 router.post('/create-payment-intent', Mcontroller.user.createPaymentIntent);
 router.get('/adminProduct', Mcontroller.admin.showProd);
 router.get('/adminUser', Mcontroller.admin.showUser);
+router.get('/adminOrder', Mcontroller.admin.showAdminOrder);
 router.post('/editProduct',Mcontroller.admin.updateProducts);
+router.post('/editUsers',Mcontroller.admin.updateUserRole);
+router.post('/editOrderStatus',Mcontroller.admin.updateOrderStatus);
 
 router.post('/sendVerificationCode',Mcontroller.user.sendVerificationCode);
 router.post('/verifyCode',Mcontroller.user.verifyCode);
@@ -34,6 +39,7 @@ router.post('/updateProfile', Mcontroller.user.updateProfile);
 router.post('/add-billing-address', Mcontroller.user.addBillingDetail); 
 router.get('/delete-cart-items/:id', Mcontroller.user.deleteCartItem);
 router.post('/checkout', Mcontroller.user.checkoutSummary);
+router.post('/processOrder', Mcontroller.user.processOrder);
 
 
 

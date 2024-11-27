@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive 3D House Carousel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="../tool.png">
+    <style>
+        /* Custom Styling for Carousel */
+        .carousel-wrapper {
+            margin: 100px 50px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 1rem;
+            scrollbar-width: none; /* Hide scrollbar (Firefox) */
+        }
+        .carousel-wrapper::-webkit-scrollbar {
+            display: none; /* Hide scrollbar (Chrome, Safari) */
+        }
+        .carousel-item {
+            scroll-snap-align: center;
+            flex: 0 0 calc(80% - 1rem); /* Default size for mobile */
+            transition: transform 0.3s ease;
+        }
+        .carousel-item:hover {
+            transform: scale(1.05);
+        }
+        @media (min-width: 768px) {
+            .carousel-item {
+                flex: 0 0 calc(33.33% - 1rem); /* Adjust for desktop */
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/nav') %>
+
+    <!-- Carousel Section -->
+    <div class="carousel-wrapper">
+        <!-- 3D House Model 1 -->
+        <div class="carousel-item bg-gray-200 p-2 rounded-lg shadow-lg">
+            <iframe title="3D House Model 1" class="w-full h-64 rounded-lg" frameborder="0" allowfullscreen 
+                src="https://sketchfab.com/models/d313271816dd43c6b19075519a24e476/embed?autostart=1&camera=0&preload=1&transparent=1&dnt=1">
+            </iframe>
+        </div>
+
+        <!-- 3D House Model 2 -->
+        <div class="carousel-item bg-gray-200 p-2 rounded-lg shadow-lg">
+            <iframe title="Modern House Model" class="w-full h-64 rounded-lg" frameborder="0" allowfullscreen 
+        src="https://sketchfab.com/models/5dd761507e3548b19f186207cde65fbb/embed?autostart=1&camera=0&preload=1&transparent=1&dnt=1">
+            </iframe>
+        </div>
+
+        <!-- 3D House Model 3 -->
+        <div class="carousel-item bg-gray-200 p-2 rounded-lg shadow-lg">
+            <iframe title="Modern House 05" class="w-full h-64 rounded-lg" frameborder="0" allowfullscreen 
+        src="https://sketchfab.com/models/9615162fdef6430d8839cd3f18d67351/embed?autostart=1&camera=0&preload=1&transparent=1&dnt=1">
+            </iframe>
+        </div>
+
+        <!-- 3D House Model 4 -->
+        <div class="carousel-item bg-gray-200 p-2 rounded-lg shadow-lg">
+            <iframe title="Private House" class="w-full h-64 rounded-lg" frameborder="0" allowfullscreen 
+        src="https://sketchfab.com/models/9e5323af11fb4fbaac6654148d9cc3f9/embed?autostart=1&camera=0&preload=1&transparent=1&dnt=1">
+            </iframe>
+
+        </div>
+
+    </div>
+
+    <!-- Your Custom Script -->
+    <script type="module" src="../..//script/script.js"></script>
+</body>
+</html>

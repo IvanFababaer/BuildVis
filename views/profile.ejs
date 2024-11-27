@@ -1,45 +1,137 @@
 <%- include('partials/start') %>
 <%- include('partials/nav') %>
 
-<div class="pt-20 flex items-center justify-center min-h-screen bg-gray-100">
-    <form action="/updateProfile" method="post" class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <div>
-          <p>Note: You will be required to login again after changes has been made.</p>
-          <br>
+<div class="flex justify-center items-center align-middle">
+  <div class="grid grid-cols-1 gap-x-5 gap-y-10 sm:grid-cols-2">
+    <div class="mt-40 flex items-center justify-center">
+      <form action="/updateProfile" method="post" class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <div>
+            <p>Note: You will be required to login again after changes has been made.</p>
+            <br>
+          </div>
+          <div class="mb-4">
+            <input type="hidden" name="id" value="<%= user.id %>">
+              <label for="username" class="block text-gray-700 font-semibold mb-2">Username:</label>
+              <input 
+                  type="text" 
+                  name="username" 
+                  id="username" 
+                  value="<%= user.username %>" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div class="mb-4">
+              <label for="email" class="block text-gray-700 font-semibold mb-2">Email:</label>
+              <input 
+                  type="email" 
+                  name="email" 
+                  id="email" 
+                  value="<%= user.email %>" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <button 
+              type="submit" 
+              class="w-full bg-indigo-500 text-white font-semibold py-2 rounded-lg hover:bg-indigo-600 transition-colors">
+              Update Profile
+          </button>
+          <div class="mt-6 text-center">
+              <p class="text-gray-600 mb-4">If you would like to update your password, click the button below:</p>
+              <a 
+                  href="/email-verification" 
+                  class="inline-block bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+                  Reset Password
+              </a>
+          </div>
+      </form> 
+    </div>
+    <!-- billing -->
+    <div>
+      <div class="max-w-2xl p-4 bg-white shadow-lg rounded-md mt-40">
+        <h1 class="text-xl font-semibold">My Purchases</h1>
+        <br>
+        <div class="grid grid-cols-3">
+          <div class="grid grid-rows-1 gap-2">
+            <i class='bx bx-package text-3xl text-center'></i>
+            <p class="text-center">To Ship</p>
+          </div>
+          <div class="grid grid-rows-1 gap-2">
+            <div class="flex justify-center">
+              <img src="..//cargo-truck.png" class="w-10 h-10 text-center" alt="">
+            </div>
+            <p class="text-center">To Received</p>
+          </div>
+          <div class="grid grid-rows-1 gap-2">
+            <div class="flex justify-center">
+              <img src="..//favorite.png" alt="" class="w-10 h-10 text-center">
+            </div>
+            <p class="text-center">To Rate</p>
+          </div>
         </div>
-        <div class="mb-4">
-          <input type="hidden" name="id" value="<%= user.id %>">
-            <label for="username" class="block text-gray-700 font-semibold mb-2">Username:</label>
-            <input 
-                type="text" 
-                name="username" 
-                id="username" 
-                value="<%= user.username %>" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      <div class="max-w-2xl p-4 bg-white shadow-lg rounded-md mt-2">
+        <h3 class="text-xl font-semibold text-gray-700 mb-3">Billing Address</h3>
+        <% billing.forEach(billing => { %>
+        <br>
+        <div class="p-3 bg-gray-100 rounded-md border">
+          <p class="text-gray-600"><%= billing.fullname %> | <%= billing.contact %></p>
+          <p class="text-gray-600"><%= billing.address %></p>
+          <p class="text-gray-600"><%= billing.note %></p>
         </div>
-        <div class="mb-4">
-            <label for="email" class="block text-gray-700 font-semibold mb-2">Email:</label>
-            <input 
-                type="email" 
-                name="email" 
-                id="email" 
-                value="<%= user.email %>" 
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    
+        <div class="mt-4 text-right">
+          <button class="px-4 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-700">
+            Edit Address
+          </button>
         </div>
-        <button 
-            type="submit" 
-            class="w-full bg-indigo-500 text-white font-semibold py-2 rounded-lg hover:bg-indigo-600 transition-colors">
-            Update Profile
-        </button>
-        <div class="mt-6 text-center">
-            <p class="text-gray-600 mb-4">If you would like to update your password, click the button below:</p>
-            <a 
-                href="/email-verification" 
-                class="inline-block bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors">
-                Reset Password
-            </a>
+        <br>
+        <hr>
+        <% }) %>
+    
+        <div class="mt-4 text-center">
+          <button id="addNewAddressBtn" class="px-10 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-700">
+            Add New Address
+          </button>
         </div>
-    </form>
+      </div>
+    </div>
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden opacity-0 scale-95 transition-all duration-300">
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 class="text-2xl font-bold mb-4">Add New Address</h2>
+            <form id="billingForm" action="/add-billing-address" method="post">
+                <div class="mb-4">
+                    <label for="fullname" class="block text-gray-700 font-semibold mb-1">Full Name:</label>
+                    <input type="text" name="fullname" placeholder="Enter Full Name" 
+                          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="contact" class="block text-gray-700 font-semibold mb-1">Contact:</label>
+                    <input type="text" name="contact" placeholder="Enter Contact" 
+                          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="address" class="block text-gray-700 font-semibold mb-1">Address:</label>
+                    <input type="text" name="address" placeholder="Enter Address" 
+                          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="note" class="block text-gray-700 font-semibold mb-1">Note:</label>
+                    <input type="text" name="note" placeholder="Additional Note" 
+                          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="closeModalBtn" 
+                            class="px-4 py-2 mr-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-700">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+  </div>
 </div>
 
 
@@ -77,3 +169,32 @@
       }
     });
   </script>
+  <script>
+    // JavaScript to handle modal toggle
+    const addNewAddressBtn = document.getElementById('addNewAddressBtn');
+    const modal = document.getElementById('modal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    addNewAddressBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden'); // Show modal
+        setTimeout(() => {
+            modal.classList.add('opacity-100', 'scale-100'); // Smoothly appear
+            modal.classList.remove('opacity-0', 'scale-95');
+        }, 0);
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        modal.classList.add('opacity-0', 'scale-95'); // Smoothly disappear
+        modal.classList.remove('opacity-100', 'scale-100');
+        setTimeout(() => {
+            modal.classList.add('hidden'); // Hide modal after animation
+        }, 300);
+    });
+
+    // Hide modal when clicking outside the modal content
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+</script>

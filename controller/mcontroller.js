@@ -130,7 +130,7 @@ const show = {
         });
     },    
     showAdminDash: (req, res) => {
-        res.render('adminDashboard');
+        res.render('admin/adminDashboard');
     },
     showEmailVerification: (req, res) => {
         res.render('emailVerification');
@@ -167,7 +167,7 @@ const show = {
             res.status(500).send('Internal Server Error');
         });
     },    
-    showBillingDetail: (req, res) => {
+    showProfile: (req, res) => {
         if (!req.session.user) {
             req.flash('error', 'Please log in first');
             return res.redirect('/login');
@@ -179,7 +179,6 @@ const show = {
         Promise.all([
             // Fetch billing details
             User.getBillingDetail(id),
-            // Wrap totalrecords in a Promise to use it with Promise.all
             new Promise((resolve, reject) => {
                 User.totalrecords(id, (err, totalRecords) => {
                     if (err) reject(err);
@@ -189,7 +188,7 @@ const show = {
         ])
         .then(([billingdetail, totalRecords]) => {
             // Render the billingDetail view with user, billing, and totalRecords data
-            res.render('billingDetail', {
+            res.render('profile', {
                 user: req.session.user,
                 billing: billingdetail,
                 totalRecords // Pass totalRecords to the view
@@ -200,33 +199,6 @@ const show = {
             res.status(500).send('Internal Server Error');
         });
     },    
-    showProfile: (req, res) => {
-        if (!req.session.user) {
-            req.flash('error', 'Please log in first');
-            return res.redirect('/login');
-        }
-    
-        const userId = req.session.user.id;
-    
-        // Fetch total records for the logged-in user
-        new Promise((resolve, reject) => {
-            User.totalrecords(userId, (err, totalRecords) => {
-                if (err) reject(err);
-                else resolve(totalRecords);
-            });
-        })
-        .then(totalRecords => {
-            // Render the profile view with user and totalRecords data
-            res.render('profile', {
-                user: req.session.user,
-                totalRecords // Pass totalRecords to the view
-            });
-        })
-        .catch(err => {
-            console.error('Error fetching total records:', err);
-            res.status(500).send('Internal Server Error');
-        });
-    },
     showCheckout: (req, res) => {
         if (!req.session.user) {
             req.flash('error', 'Please log in first');
@@ -252,7 +224,7 @@ const show = {
         ])
         .then(([billingDetail]) => {
             res.render('checkout', {
-                user: req.session.user,
+                userId: userId,
                 billing: billingDetail,
                 items: items,
                 subtotalEl: subtotalEl,
@@ -265,7 +237,67 @@ const show = {
             req.flash('error', 'Something went wrong. Please try again later.');
             res.status(500).redirect('/cart');
         });
-    }
+    },
+    orderConfirmation: (req, res) =>{
+        res.render('orderConfirmation');
+    },
+    showHouseModel: (req, res) => {
+        if (!req.session.user) {
+            req.flash('error', 'Please log in first');
+            return res.redirect('/login');
+        }
+    
+        const userId = req.session.user.id;
+    
+        // Fetch total records for the logged-in user
+        new Promise((resolve, reject) => {
+            User.totalrecords(userId, (err, totalRecords) => {
+                if (err) reject(err);
+                else resolve(totalRecords);
+            });
+        })
+        .then(totalRecords => {
+            // Render the profile view with user and totalRecords data
+            res.render('house_model/house_3d', {
+                user: req.session.user,
+                totalRecords // Pass totalRecords to the view
+            });
+        })
+        .catch(err => {
+            console.error('Error fetching total records:', err);
+            res.status(500).send('Internal Server Error');
+        });
+        
+    },
+    showOrders: (req, res) => {
+        if (!req.session.user) {
+            req.flash('error', 'Please log in first');
+            return res.redirect('/login');
+        }
+        const userId = req.session.user.id;
+    
+        Promise.all([
+            new Promise((resolve, reject) => {
+                User.totalrecords(req.session.user.id, (err, totalRecords) => {
+                    if (err) reject(err);
+                    else resolve(totalRecords);
+                });
+            }),
+            User.getOrders(userId),
+        ])
+        .then(([totalRecords, order_details]) => {
+            res.render('orders', {
+                orders: order_details,
+                totalRecords,
+            });
+        })
+        .catch(err => {
+            console.error('Error during checkout preparation:', err);
+            req.flash('error', 'Something went wrong. Please try again later.');
+            res.status(500).redirect('/dash');
+        });
+    },
+
     
     
     
@@ -320,22 +352,21 @@ const user = {
         });
     },
     
+    // /controllers/userController.js
+
     login: (req, res) => {
         const { email, password } = req.body;
         let errors = [];
-    
-        if (email === "Admin" && password === "adminako") {
-            return res.redirect('admin');
-        }
-    
+
+        // Validate input
         if (!email || !password) {
-            req.flash('error', 'Both email and password are required');
+            errors.push({ msg: 'Both email and password are required' });
         }
-    
+
         if (errors.length > 0) {
             return res.render('login', { errors, email, password });
         }
-    
+
         // Authenticate user
         User.authenticate(email, password, (err, user) => {
             if (err) {
@@ -343,24 +374,28 @@ const user = {
                 return res.status(500).send('Error during authentication');
             }
             if (!user) {
-                console.log('Invalid credentials');
                 return res.status(400).render('login', { errors: [{ msg: 'Invalid credentials' }], email });
             }
-    
-            // Set user session and retrieve total records
+
+            // Set user session
             req.session.user = user;
-    
-            // Fetch total records and pass them to the dashboard
-            User.totalrecords(user.id,(err, totalRecords) => {
-                if (err) {
-                    console.error('Error retrieving total records:', err);
-                    return res.status(500).send('Error retrieving total records');
-                }
-                console.log(totalRecords);
-                // Redirect to dashboard with totalRecords
-                console.log('User authenticated:', user);
-                res.render('dash', { user, totalRecords });
-            });
+
+            // Fetch user's role
+            User.getRole(user.id)
+                .then(role => {
+                    // Redirect based on role
+                    if (role === 'admin') {
+                        return res.redirect('/admin');
+                    } else if (role === 'user') {
+                        return res.redirect('/dash');
+                    } else {
+                        return res.status(403).send(`Unauthorized role ${role}`);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching user role:', err);
+                    return res.status(500).send('Error fetching user role');
+                });
         });
     },        
     sendVerificationCode: async (req, res) => {
@@ -618,6 +653,54 @@ const user = {
           res.status(500).json({ error: error.message });
         }
       },
+      processOrder: async (req, res) => {
+        const { cartIds, userId, billing_id } = req.body;
+      
+        if (!cartIds || cartIds.length === 0) {
+          return res.status(400).json({ error: 'No cart IDs provided' });
+        }
+      
+        try {
+          // Fetch cart items
+          const cartItems = await User.getCartItemsByIds(cartIds);
+      
+          if (cartItems.length === 0) {
+            return res.status(404).json({ error: 'No cart items found' });
+          }
+      
+          // Prepare order details
+          const orderDate = new Date();
+          const deliveryDate = new Date();
+          deliveryDate.setDate(orderDate.getDate() + 7);
+      
+          const orders = cartItems.map((item) => ({
+            user_id: userId,
+            product_id: item.product_id,
+            billing_id: billing_id,
+            quantity: item.quantity,
+            totalPrice: item.totalPrice,
+            orderDate,
+            deliveryDate,
+            status: 'Pending',
+          }));
+      
+          // Insert order details
+          await User.insertOrderDetails(orders);
+      
+          // Delete cart items
+          await User.deleteCartItemsByIds(cartIds);
+      
+          res.json({ message: 'Order processed successfully' });
+        } catch (error) {
+          console.error('Error processing order:', error);
+          res.status(500).json({ error: 'Failed to process order' });
+        }
+    },
+    
+    
+    
+    
+      
       
    
 
@@ -656,6 +739,17 @@ const admin = {
             throw err;
         });
     },
+    showAdminOrder: (req, res) => {
+        Promise.all([
+            User.getAllOrders(),
+        ]).then(([orderList]) =>{
+            res.render('admin/adminOrder', {
+                orders : orderList,
+            });
+        }).catch(err => {
+            throw err;
+        });
+    },
     updateProducts:(req, res) =>{
         const id = req.body.productId;
         const data = req.body;
@@ -673,7 +767,8 @@ const admin = {
           name: req.body.productName,
           price: req.body.price,
           description: req.body.description,
-          stock: req.body.stock,
+          current_stock: req.body.current_stock,
+          max_stock: req.body.max_stock,
           image_url: `/uploads/${req.file.filename}`,
           category: req.body.category
         };
@@ -686,7 +781,23 @@ const admin = {
           }
           res.redirect('/adminProduct'); // Adjust redirection as needed
         });
-      }
+      },
+      updateUserRole:(req, res) =>{
+        const id = req.body.user_id;
+        const data = req.body.userRole;
+        User.updateUserRole(id, data, (err) => {
+            if(err) throw err;
+            res.redirect('/adminUser');
+        });
+    },
+    updateOrderStatus:(req, res) =>{
+        const order_id = req.body.order_id;
+        const status = req.body.status;
+        User.updateOrderStatus(order_id, status, (err) => {
+            if(err) throw err;
+            res.redirect('/adminOrder');
+        });
+    },
 
 };
 

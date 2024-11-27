@@ -93,8 +93,8 @@ const user = {
         })
     },
     updateProduct:(id, data, callback) =>{
-        const query = "update products set price = ?, stock =? where product_id=?"; 
-        db.query(query, [data.price, data.stock, id], callback);
+        const query = "update products set price = ?, current_stock =?, max_stock = ?, availability = ? where product_id= ?"; 
+        db.query(query, [data.price, data.currentStock, data.maxStock, data.availability, id], callback);
     },
         // Function to get a specific product by ID
     getProductById: (id) => {
@@ -136,7 +136,7 @@ const user = {
                         }
     
                         // Update the stock in the products table
-                        const updateStockQuery = "UPDATE products SET stock = stock - ? WHERE product_id = ?";
+                        const updateStockQuery = "UPDATE products SET current_stock = current_stock - ? WHERE product_id = ?";
                         db.query(updateStockQuery, [data.quantity, data.productId], (err, result) => {
                             if (err) {
                                 return db.rollback(() => callback(err));
@@ -159,7 +159,7 @@ const user = {
                         }
     
                         // Update the stock in the products table
-                        const updateStockQuery = "UPDATE products SET stock = stock - ? WHERE product_id = ?";
+                        const updateStockQuery = "UPDATE products SET current_stock = current_stock - ? WHERE product_id = ?";
                         db.query(updateStockQuery, [data.quantity, data.productId], (err, result) => {
                             if (err) {
                                 return db.rollback(() => callback(err));
@@ -246,7 +246,7 @@ const user = {
     },
 
     updateProductStock: (productId, quantity, callback) => {
-        const query = "UPDATE products SET stock = stock + ? WHERE product_id = ?";
+        const query = "UPDATE products SET current_stock = current_stock + ? WHERE product_id = ?";
         db.query(query, [quantity, productId], callback);
     },
     getCategory:() => {
@@ -263,14 +263,15 @@ const user = {
     },
     insertProduct:(productData, callback) => {
         const sql = `
-          INSERT INTO products (name, price, description, stock, image_url, category)
-          VALUES (?, ?, ?, ?, ?, ?)
+          INSERT INTO products (name, price, description, current_stock, max_stock, image_url, category)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
         const params = [
           productData.name,
           productData.price,
           productData.description,
-          productData.stock,
+          productData.current_stock,
+          productData.max_stock,
           productData.image_url,
           productData.category
         ];
@@ -307,6 +308,116 @@ const user = {
           callback(null, results); // Pass the result if successful
         });
     },
+    // Get items from the cart by cartIds
+    getCartItemsByIds : (cartIds) => {
+    return new Promise((resolve, reject) => {
+      db.query('SELECT * FROM cart WHERE cart_id IN (?)', [cartIds], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  },
+  
+  // Delete items from the cart by cartIds
+  deleteCartItemsByIds :(cartIds) => {
+    return new Promise((resolve, reject) => {
+      db.query('DELETE FROM cart WHERE cart_id IN (?)', [cartIds], (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  },
+  
+  // Insert order details into the orderdetail table
+    insertOrderDetails:(orders) => {
+    const query =
+      'INSERT INTO orderdetail (user_id, product_id, billing_id, quantity, totalPrice, orderDate, deliveryDate, status) VALUES ?';
+    const values = orders.map((order) => [
+      order.user_id,
+      order.product_id,
+      order.billing_id,
+      order.quantity,
+      order.totalPrice,
+      order.orderDate,
+      order.deliveryDate,
+      order.status,
+    ]);
+  
+    return new Promise((resolve, reject) => {
+      db.query(query, [values], (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  },
+  insertSales:(sales) => {
+    const query =
+      'INSERT INTO sales (product_id, quantity, order_id, sale_date) VALUES ? ';
+    const values = sales.map((sales) => [
+      sales.product_id,
+      sales.quantity,
+      sales.order_id,
+      sales.sale_date
+    ]);
+  
+    return new Promise((resolve, reject) => {
+      db.query(query, [values], (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  },
+  // /models/user.js
+
+    getRole: (id) => {
+        return new Promise((resolve, reject) => {
+            const query = 'SELECT role FROM users WHERE id = ?';
+            db.query(query, [id], (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+                if (results.length > 0) {
+                    resolve(results[0].role); // Return the first role found
+                } else {
+                    reject(new Error('No role found for the given user ID'));
+                }
+            });
+        });
+    },
+    updateUserRole: (user_id, role, callback) => {
+        const query = "UPDATE users SET role = ? WHERE id = ?";
+        db.query(query, [role, user_id], callback);
+    },
+    updateOrderStatus: (order_id, status, callback) => {
+        const query = "UPDATE orderdetail SET status = ? WHERE order_id = ?";
+        db.query(query, [status, order_id], callback);
+    },
+
+    getOrders: (id) => {
+        return new Promise((resolve, reject) => {
+            const query = 'SELECT orderdetail.order_id, products.name, orderdetail.totalPrice, orderdetail.orderDate, orderdetail.status  FROM orderdetail INNER JOIN products ON orderdetail.product_id = products.product_id WHERE orderdetail.user_id = ?';
+            db.query(query, [id], (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        });
+    },
+    getAllOrders: () => {
+        return new Promise((resolve, reject) => {
+            const query = 'SELECT orderdetail.order_id, products.name, orderdetail.quantity, orderdetail.totalPrice, orderdetail.orderDate, orderdetail.status  FROM orderdetail INNER JOIN products ON orderdetail.product_id = products.product_id';
+            db.query(query, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        });
+    },
+
+
+
     
     
     

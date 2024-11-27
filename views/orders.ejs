@@ -1,0 +1,61 @@
+<!-- /order-history.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 pt-40">
+    <%- include('partials/nav') %>
+    <div class="min-h-screen flex flex-col">
+        <!-- Main Content -->
+        <main class="container mx-auto px-6 py-8 flex-1">
+            <!-- Order List -->
+            <div class="bg-white rounded-lg shadow">
+                
+                <table class="w-full text-left table-auto">
+                    <thead class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                        <tr>
+                            <th class="py-3 px-6">Order ID</th>
+                            <th class="py-3 px-6">Product Name</th>
+                            <th class="py-3 px-6">Date</th>
+                            <th class="py-3 px-6">Total</th>
+                            <th class="py-3 px-6">Status</th>
+                        </tr>
+                    </thead>
+                    <% orders.forEach(orders => { %>
+                    <tbody class="text-gray-700 text-sm divide-y divide-gray-200">
+                            <tr>
+                                <td class="py-4 px-6"><%= orders.order_id %></td>
+                                <td class="py-4 px-6"><%= orders.name %></td>
+                                <td class="py-4 px-6"><%= orders.orderDate %></td>
+                                <td class="py-4 px-6"><%= orders.totalPrice %></td>
+                                <td class="py-4 px-6">
+                                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                                        <%= orders.status %>
+                                    </span>
+                                </td>
+                            </tr>
+                    </tbody>
+                    <% }) %>
+                </table>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-4">
+            <div class="container mx-auto px-6 text-center">
+                <p class="text-sm">&copy; 2024 Your E-commerce Site. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+<script type="module" src="..//script/script.js"></script>
+
+
+</body>
+
+</html>
