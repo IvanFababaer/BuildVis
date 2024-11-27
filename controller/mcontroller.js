@@ -7,7 +7,7 @@ const SECRET_KEY = process.env.SECRET_KEY || 'defaultSecretKey'; // Use environm
 const itemsPerPage = 10; // Set items per page
 const verificationCodes = {}; // Temporary storage
  // Controller Function
- const stripe = require('stripe')('sk_test_51QByzxDiiet8LsHjyPEAOe1d9RXocsOpYMXuspmrHC8XPqbrJhTugNdvldsvDHaAxVEXbcr9cxsCFqsa6v7DMEFS002wB9LZCq');
+ const stripe = require('stripe')('sk_test');
 
 const show = {
     showlanding: (req, res) => {
