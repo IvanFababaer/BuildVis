@@ -1,0 +1,52 @@
+<nav class="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="#" class="text-xl font-bold text-green-800">BuildVis</a>
+      <div class="flex items-center space-x-6">
+        <!-- Dropdown Container -->
+        <a href="/dash" class="text-gray-700 hover:text-green-800">Home</a>
+        <div class="relative inline-block">
+          <button class="flex items-center gap-1.5 px-4 py-2 text-gray-700 hover:text-green-700 focus:outline-none">
+            Catalog
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform duration-200 chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute left-0 mt-2 w-48 transform -translate-y-2 opacity-0 transition-all duration-200 dropdown-menu">
+            <div class="bg-white rounded-lg shadow-lg p-1 border border-gray-200">
+              <a href="/materials" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">Materials</a>
+              <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">House Model</a>
+              <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">Apartment Model</a>
+            </div>
+          </div>
+        </div>
+        <a href="/contactUs" class="text-gray-700 hover:text-green-800">Contact Us</a>
+  
+        <!-- Cart Icon with Notification Count -->
+        <a href="/cart" class="relative text-gray-700 hover:text-green-800">
+          <img src="..//grocery-store.png" alt="Cart" class="w-6 h-6 inline-block">
+          <!-- Notification Badge -->
+          <span class="absolute top-0 right-[-20px] flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -translate-x-1/2 -translate-y-1/2">
+            <%= totalRecords %> <!-- Example number, replace with dynamic count -->
+          </span>
+        </a>
+  
+        <!-- Profile dropdown -->
+        <div class="relative inline-block">
+          <button
+            onclick="toggleDropdown()"
+            class="flex items-center px-4 py-2 text-gray-700 hover:text-green-800 focus:outline-none"
+          >
+            <img src="..//user.png" alt="User" class="w-6 h-6">
+          </button>
+  
+          <!-- Dropdown menu -->
+          <div id="dropdownMenu" class="absolute hidden mt-2 bg-white border border-gray-200 rounded-md shadow-lg">
+            <a href="/profile" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
+            <a href="/billing-detail" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Billing Details</a>
+            <a href="#" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Orders</a>
+            <a href="/logout" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>

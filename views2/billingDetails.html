@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../tool.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Billing Details</title>
+</head>
+<body class="pt-20 bg-gray-50">
+
+    <%- include('partials/nav') %>
+
+    <!-- Main Content -->
+    <div class="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-md mt-20">
+        <h3 class="text-2xl font-semibold text-gray-800 mb-5">Billing Address</h3>
+        
+        <% billing.forEach(billing => { %>
+        <div class="p-4 bg-gray-100 rounded-md border border-gray-300 mb-4">
+          <p class="text-gray-700"><%= billing.fullname %> | <%= billing.contact %></p>
+          <p class="text-gray-700"><%= billing.address %></p>
+          <p class="text-gray-700"><%= billing.note %></p>
+        </div>
+
+        <div class="mt-4 text-right">
+          <button class="px-6 py-2 text-white bg-yellow-500 rounded hover:bg-yellow-300 transition duration-200">
+            Edit Address
+          </button>
+        </div>
+        <hr class="my-6">
+        <% }) %>
+
+        <!-- Add New Address Button -->
+        <div class="mt-6 text-center">
+          <button id="addNewAddressBtn" class="px-10 py-2 text-white bg-yellow-500 rounded hover:bg-yellow-300 transition duration-200">
+            Add New Address
+          </button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden opacity-0 scale-95 transition-all duration-300">
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Add New Address</h2>
+            <form id="billingForm" action="/add-billing-address" method="post">
+                <div class="mb-4">
+                    <label for="fullname" class="block text-gray-700 font-semibold mb-1">Full Name:</label>
+                    <input type="text" name="fullname" placeholder="Enter Full Name" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div class="mb-4">
+                    <label for="contact" class="block text-gray-700 font-semibold mb-1">Contact:</label>
+                    <input type="text" name="contact" placeholder="Enter Contact" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div class="mb-4">
+                    <label for="address" class="block text-gray-700 font-semibold mb-1">Address:</label>
+                    <input type="text" name="address" placeholder="Enter Address" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div class="mb-4">
+                    <label for="note" class="block text-gray-700 font-semibold mb-1">Note:</label>
+                    <input type="text" name="note" placeholder="Additional Note" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="closeModalBtn" 
+                            class="px-4 py-2 mr-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 transition duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 text-white bg-yellow-500 rounded hover:bg-yellow-300 transition duration-200">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript for Modal -->
+    <script>
+        const addNewAddressBtn = document.getElementById('addNewAddressBtn');
+        const modal = document.getElementById('modal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        addNewAddressBtn.addEventListener('click', () => {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100', 'scale-100');
+                modal.classList.remove('opacity-0', 'scale-95');
+            }, 0);
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('opacity-0', 'scale-95');
+            modal.classList.remove('opacity-100', 'scale-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        });
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    </script>
+
+    <!-- External JS (if any) -->
+    <script type="module" src="..//script/script.js"></script>
+</body>
+</html>
