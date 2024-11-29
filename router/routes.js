@@ -40,6 +40,7 @@ router.post('/add-billing-address', Mcontroller.user.addBillingDetail);
 router.get('/delete-cart-items/:id', Mcontroller.user.deleteCartItem);
 router.post('/checkout', Mcontroller.user.checkoutSummary);
 router.post('/processOrder', Mcontroller.user.processOrder);
+router.post('/order-again', Mcontroller.user.orderAgain);
 
 
 

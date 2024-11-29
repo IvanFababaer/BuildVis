@@ -7,7 +7,7 @@ const SECRET_KEY = process.env.SECRET_KEY || 'defaultSecretKey'; // Use environm
 const itemsPerPage = 10; // Set items per page
 const verificationCodes = {}; // Temporary storage
  // Controller Function
- const stripe = require('stripe')('sk_test');
+ const stripe = require('stripe')('sk_test_51QByzxDiiet8LsHjyPEAOe1d9RXocsOpYMXuspmrHC8XPqbrJhTugNdvldsvDHaAxVEXbcr9cxsCFqsa6v7DMEFS002wB9LZCq');
 
 const show = {
     showlanding: (req, res) => {
@@ -174,10 +174,34 @@ const show = {
         }
     
         const id = req.session.user.id;
-        console.log('User ID:', id);
+        const status = req.query.status || 'Pending'; // Default to Pending if no status is provided
+    
+        console.log('User ID:', id, 'Status:', status);
+    
+        let getOrdersByStatus;
+    
+        switch (status) {
+            case 'Pending':
+                getOrdersByStatus = User.getPendingOrders(id);
+                break;
+            case 'Pickup':
+                getOrdersByStatus = User.getPickupOrder(id);
+                break;
+            case 'Out_for_delivery':
+                getOrdersByStatus = User.getOutDeliveryOrder(id);
+                break;
+            case 'Delivered':
+                getOrdersByStatus = User.getDeliveredOrder(id);
+                break;
+            case 'Rate':
+                getOrdersByStatus = User.getToRateOrder(id);
+                break;
+            default:
+                getOrdersByStatus = User.getOrders(id);
+        }
     
         Promise.all([
-            // Fetch billing details
+            getOrdersByStatus,
             User.getBillingDetail(id),
             new Promise((resolve, reject) => {
                 User.totalrecords(id, (err, totalRecords) => {
@@ -186,16 +210,17 @@ const show = {
                 });
             })
         ])
-        .then(([billingdetail, totalRecords]) => {
-            // Render the billingDetail view with user, billing, and totalRecords data
+        .then(([filteredOrders, billingdetail, totalRecords]) => {
             res.render('profile', {
                 user: req.session.user,
+                orders: filteredOrders,
                 billing: billingdetail,
-                totalRecords // Pass totalRecords to the view
+                totalRecords,
+                selectedStatus: status // Optional: to highlight the selected tab
             });
         })
         .catch(err => {
-            console.error('Error fetching billing data:', err);
+            console.error('Error fetching orders data:', err);
             res.status(500).send('Internal Server Error');
         });
     },    
@@ -696,6 +721,42 @@ const user = {
           res.status(500).json({ error: 'Failed to process order' });
         }
     },
+    orderAgain: async (req, res) => {
+        try {
+            const { orderId, productId } = req.body;
+    
+            console.log(productId);
+            // Fetch order details
+            const order = await User.getOrderById(orderId);
+            if (!order) {
+                return res.status(404).json({ message: 'Order not found.' });
+            }
+    
+            // Prepare data for cart insertion
+            const cartItem = {
+                user_id: order.user_id,
+                productId: productId,
+                quantity: 1, // Reset quantity to 1
+                totalPrice: order.totalPrice / order.quantity, // Adjust price to single item
+            };
+    
+            const addToCartPromise = () =>
+                new Promise((resolve, reject) => {
+                    User.addToCart(cartItem, (err, result) => {
+                        if (err) return reject(err);
+                        resolve(result);
+                    });
+                });
+    
+            // Await the result of addToCart
+            await addToCartPromise();
+            res.status(200).json({ message: 'Order added to cart successfully!' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Server error.' });
+        }
+    }
+    
     
     
     

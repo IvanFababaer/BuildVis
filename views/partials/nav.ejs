@@ -11,9 +11,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        <div class="absolute left-0 mt-2 w-48 transform -translate-y-2 opacity-0 transition-all duration-200 dropdown-menu">
+        <div class="absolute left-0 mt-2 w-48 transform -translate-y-2 opacity-0 pointer-events-none transition-all duration-200 dropdown-menu">
           <div class="bg-white rounded-lg shadow-lg p-1 border border-gray-200">
-            <a href="/materials" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">Materials</a>
+            <a href="/materials" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">Products</a>
             <a href="/house-model" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">House Model</a>
             <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700">Apartment Model</a>
           </div>
@@ -23,8 +23,7 @@
 
       <!-- Cart Icon with Notification Count -->
       <a href="/cart" class="relative text-gray-700 hover:text-green-800">
-        <img src="..//grocery-store.png" alt="Cart" class="w-6 h-6 inline-block">
-        <!-- Conditional Notification Badge -->
+        <img src="../grocery-store.png" alt="Cart" class="w-6 h-6 inline-block">
         <% if (totalRecords > 0) { %>
           <span class="absolute top-0 right-[-20px] flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -translate-x-1/2 -translate-y-1/2">
             <%= totalRecords %>
@@ -34,15 +33,10 @@
 
       <!-- Profile dropdown -->
       <div class="relative inline-block">
-        <button
-          onclick="toggleDropdown()"
-          class="flex items-center px-4 py-2 text-gray-700 hover:text-green-800 focus:outline-none"
-        >
-          <img src="..//user.png" alt="User" class="w-6 h-6">
+        <button class="flex items-center px-4 py-2 text-gray-700 hover:text-green-800 focus:outline-none">
+          <img src="../user.png" alt="User" class="w-6 h-6">
         </button>
-
-        <!-- Dropdown menu -->
-        <div id="dropdownMenu" class="absolute hidden mt-2 bg-white border border-gray-200 rounded-md shadow-lg">
+        <div id="dropdownMenu" class="absolute hidden mt-2 bg-white border border-gray-200 rounded-md shadow-lg pointer-events-none">
           <a href="/profile" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
           <a href="/orders" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Orders</a>
           <a href="/logout" class="block px-6 py-2 text-gray-700 hover:bg-gray-100">Logout</a>

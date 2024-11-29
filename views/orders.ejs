@@ -15,9 +15,9 @@
         <!-- Main Content -->
         <main class="container mx-auto px-6 py-8 flex-1">
             <!-- Order List -->
-            <div class="bg-white rounded-lg shadow">
+            <div class="bg-white rounded-lg shadow px-24 py-16">
                 
-                <table class="w-full text-left table-auto">
+                <!-- <table class="w-full text-left table-auto">
                     <thead class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                         <tr>
                             <th class="py-3 px-6">Order ID</th>
@@ -42,7 +42,28 @@
                             </tr>
                     </tbody>
                     <% }) %>
-                </table>
+                </table> -->
+
+                <div class="text-4xl font-semibold">Order History</div>
+                <% orders.forEach(orders => { %>
+                <div>
+                    <div class="mt-10 grid grid-cols-[15rem,1fr,8rem] p-5 border-solid border-2 rounded-xl">
+                        <div class="productImage">
+                             <img src="<%= orders.image_url %>" alt="" class="h-64 w-56">
+                        </div>
+                         <div class="description">
+                            <div class="text-2xl font-semibold"><%= orders.name %></div>
+                            <div class="text-lg font-medium pt-3">x<%= orders.quantity %></div>
+                            <div class="text-lg font-medium pt-3 pb-16">&#8369;<%= orders.price %></div>
+                            <div class="text-lg font-extralight pt-3"><%= orders.orderDate %></div>
+                            <div class="text-2xl font-regular">Total Price: &#8369; <%= orders.totalPrice %></div>
+                         </div>
+                         <div>
+                            <div class="text-lg font-medium "><%= orders.status %></div>
+                         </div>
+                    </div>
+                </div>
+                <% }) %>
             </div>
         </main>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive 3D House Carousel</title>
+    <title>House Model</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/x-icon" href="../tool.png">
     <style>
@@ -38,7 +38,20 @@
 </head>
 <body>
     <%- include('../partials/nav') %>
-
+    <h1 class="text-4xl font-bold mt-32 text-center">House Models</h1>
+    <br>
+    <br>
+     <!-- filter -->
+    <div>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0 ml-24">
+            <input
+                type="number"
+                placeholder="Enter your budget"
+                id="searchinput"
+                class="px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+        </div>
+    </div>
     <!-- Carousel Section -->
     <div class="carousel-wrapper">
         <!-- 3D House Model 1 -->
@@ -74,5 +87,71 @@
 
     <!-- Your Custom Script -->
     <script type="module" src="../..//script/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const budgetInput = document.getElementById('searchinput');
+    const houseMaterials = {
+        "House Model 1": {
+            materials: [
+                { name: "Concrete (bags)", quantity: 50, price: 200 },
+                { name: "Bricks (pcs)", quantity: 1000, price: 10 },
+                { name: "Wood (planks)", quantity: 20, price: 500 },
+                { name: "Steel (bars)", quantity: 15, price: 300 },
+                { name: "Tiles (sq.m)", quantity: 30, price: 250 }
+            ],
+            totalCost: 0
+        },
+        "House Model 2": {
+            materials: [
+                { name: "Concrete (bags)", quantity: 70, price: 200 },
+                { name: "Bricks (pcs)", quantity: 1500, price: 10 },
+                { name: "Wood (planks)", quantity: 30, price: 500 },
+                { name: "Steel (bars)", quantity: 20, price: 300 },
+                { name: "Tiles (sq.m)", quantity: 50, price: 250 }
+            ],
+            totalCost: 0
+        }
+    };
+
+    // Function to calculate total cost
+    function calculateTotal(houseKey) {
+        const materials = houseMaterials[houseKey].materials;
+        return materials.reduce((acc, material) => acc + material.quantity * material.price, 0);
+    }
+
+    // Update material cost dynamically
+    Object.keys(houseMaterials).forEach(house => {
+        houseMaterials[house].totalCost = calculateTotal(house);
+    });
+
+    budgetInput.addEventListener('input', () => {
+        const budget = parseInt(budgetInput.value, 10);
+        if (!budget || isNaN(budget)) return;
+
+        // Filter houses within the budget
+        const affordableHouses = Object.keys(houseMaterials).filter(
+            house => houseMaterials[house].totalCost <= budget
+        );
+
+        // Display results
+        const results = affordableHouses.length
+            ? affordableHouses.map(house => {
+                  const materialList = houseMaterials[house].materials
+                      .map(material => `<li>${material.quantity}x ${material.name} @ ₱${material.price}</li>`)
+                      .join("");
+                  return `
+                      <div class="bg-white p-4 rounded shadow">
+                          <h3 class="text-lg font-semibold">${house}</h3>
+                          <ul>${materialList}</ul>
+                          <p>Total Cost: ₱${houseMaterials[house].totalCost}</p>
+                      </div>`;
+              })
+            : `<p class="text-red-500">No houses available within your budget.</p>`;
+
+        document.querySelector('.carousel-wrapper').innerHTML = results.join("");
+    });
+});
+
+    </script>
 </body>
 </html>

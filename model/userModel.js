@@ -395,7 +395,73 @@ const user = {
 
     getOrders: (id) => {
         return new Promise((resolve, reject) => {
-            const query = 'SELECT orderdetail.order_id, products.name, orderdetail.totalPrice, orderdetail.orderDate, orderdetail.status  FROM orderdetail INNER JOIN products ON orderdetail.product_id = products.product_id WHERE orderdetail.user_id = ?';
+            const query = 'SELECT orderdetail.order_id, orderdetail.product_id, products.name, products.image_url, products.price, orderdetail.totalPrice, orderdetail.quantity, orderdetail.orderDate, orderdetail.status  FROM orderdetail INNER JOIN products ON orderdetail.product_id = products.product_id WHERE orderdetail.user_id = ? ORDER BY orderdetail.orderDate';
+            db.query(query, [id], (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        });
+    },
+    getOrderById: (orderId) => {
+        return new Promise((resolve, reject) => {
+          const query = 'SELECT user_id, product_id, quantity, totalPrice FROM orderdetail WHERE order_id = ?';
+          db.query(query, [orderId], (err, result) => {
+            if (err) {
+              return reject(err);
+            }
+            resolve(result.length > 0 ? result[0] : null);
+          });
+        });
+    },
+    getPendingOrders: (id) => {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT orderdetail.order_id, orderdetail.product_id, products.name, products.image_url, products.price, orderdetail.totalPrice, orderdetail.quantity, orderdetail.orderDate, orderdetail.status  FROM orderdetail INNER JOIN products ON orderdetail.product_id = products.product_id WHERE orderdetail.user_id = ? AND orderdetail.status = 'Pending'";
+            db.query(query, [id], (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        });
+    },
+    getPickupOrder: (id) => {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT orderdetail.order_id, orderdetail.product_id, products.name, products.image_url, products.price, orderdetail.totalPrice, orderdetail.quantity, orderdetail.orderDate, orderdetail.status  FROM orderdetail INNER JOIN products ON orderdetail.product_id = products.product_id WHERE orderdetail.user_id = ? AND orderdetail.status ='Pickup'";
+            db.query(query, [id], (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        });
+    },
+    getOutDeliveryOrder: (id) => {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT orderdetail.order_id, orderdetail.product_id, products.name, products.image_url, products.price, orderdetail.totalPrice, orderdetail.quantity, orderdetail.orderDate, orderdetail.status  FROM orderdetail INNER JOIN products ON orderdetail.product_id = products.product_id WHERE orderdetail.user_id = ? AND orderdetail.status = 'Out_for_delivery'";
+            db.query(query, [id], (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        });
+    },
+    getDeliveredOrder: (id) => {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT orderdetail.order_id, orderdetail.product_id, products.name, products.image_url, products.price, orderdetail.totalPrice, orderdetail.quantity, orderdetail.orderDate, orderdetail.status  FROM orderdetail INNER JOIN products ON orderdetail.product_id = products.product_id WHERE orderdetail.user_id = ? AND orderdetail.status = 'Delivered'";
+            db.query(query, [id], (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        });
+    },
+    getToRateOrder: (id) => {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT orderdetail.order_id, orderdetail.product_id, products.name, products.image_url, products.price, orderdetail.totalPrice, orderdetail.quantity, orderdetail.orderDate, orderdetail.status  FROM orderdetail INNER JOIN products ON orderdetail.product_id = products.product_id WHERE orderdetail.user_id = ? AND orderdetail.status = 'Rate'";
             db.query(query, [id], (err, result) => {
                 if (err) {
                     return reject(err);
