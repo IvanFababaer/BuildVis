@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Regular Datatables CSS -->
+    <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
+    <!-- Responsive Extension Datatables CSS -->
+    <link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet">
+
+    <style>
+        /* Styling overrides for Datatables and other custom styles */
+        .dataTables_wrapper select,
+        .dataTables_wrapper .dataTables_filter input {
+            color: #4a5568;
+            padding: .5rem 1rem;
+            border-width: 2px;
+            border-radius: .25rem;
+            border-color: #edf2f7;
+            background-color: #edf2f7;
+        }
+        table.dataTable.hover tbody tr:hover,
+        table.dataTable.display tbody tr:hover {
+            background-color: #ebf4ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-yellow-300 shadow-lg transform transition-transform duration-200 ease-in-out">
+    <div class="flex items-center justify-between h-16 px-4 border-b">
+        <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
+        <button id="closeSidebar" class="p-2 rounded-md lg:hidden hover:bg-gray-100">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+    </div>
+    <nav class="mt-4">
+        <a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-yellow-200">Dashboard</a>
+        <a href="/adminUser" class="flex items-center px-4 py-3 text-gray-600 hover:bg-yellow-200">Users</a>
+        <a href="/adminProduct" class="flex items-center px-4 py-3 text-gray-600 hover:bg-yellow-200">Products</a>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<div id="mainContent" class="lg:ml-64 min-h-screen">
+    <!-- Top Navigation -->
+    <header class="bg-white shadow-sm">
+        <div class="flex items-center justify-between h-16 px-4">
+            <button id="openSidebar" class="p-2 rounded-md lg:hidden hover:bg-gray-100">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="p-8">
+        <div class="container w-full mx-auto px-2">
+            <div id='recipients' class="p-8 mt-6 rounded shadow bg-white">
+                <table id="example" class="stripe hover" style="width:100%; padding-top: 1em; padding-bottom: 1em;">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% user.forEach(user=> {%>
+                        <tr>
+                            <td><%= user.id %></td>
+                            <td><%= user.username %></td>
+                            <td><%= user.email %></td>
+                            <td><%= user.role %></td>
+                            <td>
+                                <button class="editBtn px-2 py-1 bg-yellow-500 text-white rounded">Edit</button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-lg w-96 p-6">
+        <h2 id="productName" class="text-xl font-semibold mb-4">Edit Product - <span id="modalProductName"></span></h2>
+        <input type="hidden" id="productId">
+        <div class="mb-4">
+            <label for="editPrice" class="block text-sm font-medium text-gray-700">Price</label>
+            <input type="text" id="editPrice" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter new price">
+        </div>
+        <div class="mb-4">
+            <label for="editStock" class="block text-sm font-medium text-gray-700">Stock</label>
+            <input type="text" id="editStock" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter new stock">
+        </div>
+        <div class="flex justify-end">
+            <button id="saveButton" class="px-4 py-2 bg-yellow-500 text-white rounded-lg mr-2">Save</button>
+            <button id="closeModal" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var table = $('#example').DataTable({
+            responsive: true
+        }).columns.adjust().responsive.recalc();
+
+        // Open modal on Edit button click
+        $('#example tbody').on('click', 'button.editBtn', function () {
+            var data = table.row($(this).parents('tr')).data();
+
+            // Populate modal fields with selected row data
+            $('#productId').val(data[0]); // Product ID
+            $('#modalProductName').text(data[1]); // Product Name
+            $('#editPrice').val(data[2]); // Price
+            $('#editStock').val(data[3]); // Stock
+
+            // Show modal
+            $('#editModal').removeClass('hidden');
+        });
+
+        // Close modal on Cancel button click
+        $('#closeModal').on('click', function () {
+            $('#editModal').addClass('hidden');
+        });
+
+        // Close modal when clicking outside
+        $(document).on('click', function (e) {
+            if ($(e.target).is('#editModal')) {
+                $('#editModal').addClass('hidden');
+            }
+        });
+
+        // Save button logic (placeholder for actual save functionality)
+        $('#saveButton').on('click', function () {
+            var productId = $('#productId').val();
+            var newPrice = $('#editPrice').val();
+            var newStock = $('#editStock').val();
+
+            console.log(`Saving Product ID: ${productId}, New Price: ${newPrice}, New Stock: ${newStock}`);
+
+            $('#editModal').addClass('hidden');
+        });
+    });
+</script>
+
+</body>
+</html>

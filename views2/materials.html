@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="..//tool.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Smooth transitions */
+    .dropdown-transition {
+      transition: transform 0.2s ease-in-out;
+    }
+    .opacity-transition {
+      transition: opacity 0.2s ease-in-out;
+    }
+  </style>
+  <title>Materials</title>
+</head>
+<body class="pt-28 overscroll-none bg-gray-50">
+
+  <%- include('partials/nav') %>
+
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex flex-wrap justify-center items-center space-x-4 mb-8">
+      <!-- Search Input -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0">
+        <input
+          type="text"
+          placeholder="Search product name"
+          id="searchinput"
+          class="px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+        />
+      </div>
+
+      <!-- Categories Dropdown -->
+      <div>
+        <select
+          class="px-4 py-2 text-black bg-yellow-100 rounded-md focus:ring-2 focus:ring-yellow-500"
+          id="categorySelect"
+        >
+          <option value="all" selected>Select All</option>
+          <% category.forEach(ct => { %>
+            <option value="<%= ct.category.toLowerCase() %>"><%= ct.category %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Price Filtering -->
+      <div class="flex items-center space-x-2">
+        <input
+          type="number"
+          id="minPrice"
+          placeholder="Min Price"
+          class="px-2 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 w-28"
+        />
+        <span class="text-gray-500">-</span>
+        <input
+          type="number"
+          id="maxPrice"
+          placeholder="Max Price"
+          class="px-2 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 w-28"
+        />
+        <button
+          type="button"
+          id="applyPriceFilter"
+          class="px-4 py-2 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        >
+          Apply
+        </button>
+      </div>
+    </div>
+
+    <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+      <h2 class="text-2xl font-bold tracking-tight text-gray-900">Material List</h2>
+
+      <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+        <% product.forEach(pr => { %>
+        <div class="group relative" id="prcontainer" data-category="<%= pr.category.toLowerCase() %>" data-price="<%= pr.price %>">
+          <div class="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
+            <img src="<%= pr.image_url %>" alt="<%= pr.name %>" class="h-full w-full object-cover object-center lg:h-full lg:w-full">
+          </div>
+          <div class="mt-4 flex justify-between">
+            <div>
+              <h3 class="text-sm text-gray-700">
+                <a href="/material-overview/<%= pr.product_id %>" id="name">
+                  <span aria-hidden="true" class="absolute inset-0"></span>
+                  <%= pr.name %>
+                </a>
+              </h3>
+              <p class="mt-1 text-sm text-gray-500"><%= pr.description %></p>
+            </div>
+            <p class="text-sm font-medium text-gray-900">&#8369;<%= pr.price %></p>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <div id="nores" class="text-center text-red-500 mt-4" style="display: none;">No Products Found</div>
+    </div>
+  </div>
+
+  <footer class="bg-yellow-800 text-white py-8">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2024 BuildVis. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Debounce function for efficiency
+    function debounce(func, delay) {
+      let timer;
+      return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+    // Initialize products
+    const products = Array.from(document.querySelectorAll('#prcontainer')).map(product => ({
+      element: product,
+      name: product.querySelector('#name').innerText.trim().toLowerCase(),
+      category: product.dataset.category.toLowerCase(),
+      price: parseFloat(product.dataset.price),
+    }));
+
+    const searchInput = document.getElementById('searchinput');
+    const categorySelect = document.getElementById('categorySelect');
+    const minPriceInput = document.getElementById('minPrice');
+    const maxPriceInput = document.getElementById('maxPrice');
+    const applyPriceFilterButton = document.getElementById('applyPriceFilter');
+    const noResultMessage = document.getElementById('nores');
+
+    // Filter products based on search, category, and price
+    function filterProducts() {
+      const searchQuery = searchInput.value.trim().toLowerCase();
+      const selectedCategory = categorySelect.value;
+      const minPrice = parseFloat(minPriceInput.value) || 0;
+      const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
+
+      let productFound = false;
+
+      products.forEach(({ element, name, category, price }) => {
+        const matchesCategory = selectedCategory === "all" || category === selectedCategory;
+        const matchesSearch = name.includes(searchQuery);
+        const matchesPrice = price >= minPrice && price <= maxPrice;
+
+        if (matchesCategory && matchesPrice && (searchQuery === "" || matchesSearch)) {
+          element.style.display = 'block';
+          productFound = true;
+        } else {
+          element.style.display = 'none';
+        }
+      });
+
+      noResultMessage.style.display = productFound ? 'none' : 'block';
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', debounce(filterProducts, 300));
+    categorySelect.addEventListener('change', filterProducts);
+    applyPriceFilterButton.addEventListener('click', filterProducts);
+  </script>
+
+  <script type="module" src="..//script/script.js"></script>
+</body>
+</html>
